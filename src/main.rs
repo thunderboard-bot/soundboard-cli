@@ -4,7 +4,8 @@ mod api;
 
 use clap::{Arg, Command};
 
-fn main() {
+#[tokio::main]
+async fn main() {
     let matches = cli().get_matches();
 
     match matches.subcommand() {
@@ -18,23 +19,30 @@ fn main() {
                 Some(("api", api_matches)) => {
                     let api_url = api_matches.get_one::<String>("api-url").unwrap();
                     println!("Setting API URL to {}", api_url);
+                    // verify URL does not end in /
+                    if api_url.ends_with("/") {
+                        println!("API URL should not end in /");
+                        return;
+                    }
                     config::set_server(api_url.clone()).unwrap();
                 },
                 _ => unreachable!()
             }
         },
         Some(("list", _)) => {
-            println!("Listing all sound clips");
+            println!("Available Sounds are: ");
+            sounds::list_sounds().await.unwrap();
         },
         Some(("play", play_matches)) => {
             let sound_id = play_matches.get_one::<String>("sound-id").unwrap();
             println!("Playing sound clip {}", sound_id);
+            sounds::play_sound(sound_id.clone()).await.unwrap();
         },
         Some(("add", add_matches)) => {
             let sound_name = add_matches.get_one::<String>("sound-name").unwrap();
             let sound_file = add_matches.get_one::<String>("path/to/sound-file").unwrap();
             println!("Uploading sound clip {} from {}", sound_name, sound_file);
-            sounds::add_sound(sound_name.clone(), sound_file.clone());
+            sounds::add_sound(sound_name.clone(), sound_file.clone()).await.unwrap();
         },
         _ => unreachable!()
     }
