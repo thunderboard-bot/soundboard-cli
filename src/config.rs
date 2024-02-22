@@ -1,18 +1,8 @@
 use std::error::Error;
-use std::{fmt, fs};
+use std::fs;
 use std::path::PathBuf;
 use serde::{Deserialize, Serialize};
-
-#[derive(Debug)]
-pub struct CustomError(pub String);
-
-impl fmt::Display for CustomError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "There is an error: {}", self.0)
-    }
-}
-
-impl Error for CustomError {}
+use crate::custom_error::CustomError;
 
 #[derive(Serialize, Deserialize)]
 pub struct Config {
@@ -74,7 +64,6 @@ pub fn set_token(token: String) -> Result<(), Box<dyn Error>> {
 }
 
 pub fn set_server(server: String) -> Result<(), Box<dyn Error>> {
-    // TODO: validate as URL with or without trailing slash
     let mut config = get_config();
     if config.is_err()
     {
@@ -92,7 +81,6 @@ fn set_config(config: Config) -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
-// Unix implementation
 #[cfg(unix)]
 fn get_config_file() -> Result<PathBuf, Box<dyn Error>> {
     let home = dirs::home_dir().ok_or("Could not find home directory")?;

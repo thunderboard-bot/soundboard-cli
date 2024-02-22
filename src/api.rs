@@ -1,8 +1,6 @@
-use crate::config::get_config;
-
-// build reqwest client with token header
 use reqwest::{Client, RequestBuilder};
 use reqwest::header::HeaderMap;
+use crate::config::get_config;
 
 pub fn get_client(path: String) -> Result<RequestBuilder, Box<dyn std::error::Error>> {
     let config = get_config()?;

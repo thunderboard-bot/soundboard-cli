@@ -1,5 +1,5 @@
 use crate::api::{get_client, post_client,  post_without_body_client};
-use crate::config::CustomError;
+use crate::custom_error::CustomError;
 
 #[derive(Debug, serde::Deserialize)]
 pub struct Sound {

@@ -1,6 +1,7 @@
 mod config;
 mod sounds;
 mod api;
+mod custom_error;
 
 use clap::{Arg, Command};
 
