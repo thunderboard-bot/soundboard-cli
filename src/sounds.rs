@@ -8,19 +8,21 @@ pub struct Sound {
     #[serde(rename(deserialize = "submittedBy"))]
     pub submitted_by: String
 }
-
 pub async fn add_sound(sound_name: String, sound_file_path: String) -> Result<(), Box<dyn std::error::Error>> {
-    let sound_file_binary = std::fs::read(sound_file_path)?;
+    let sound_file_binary = std::fs::read(sound_file_path.clone())?;
 
     use base64::{Engine as _, engine::general_purpose};
     let b64_sound_file = general_purpose::STANDARD.encode(sound_file_binary);
+    let filename = sound_file_path.split("/").last().unwrap();
 
     let form = format!(
         r#"{{
             "name": "{}",
-            "file": "{}"
+            "fileName": "{}",
+            "data": "{}"
         }}"#,
         sound_name,
+        filename,
         b64_sound_file
     );
     let client = post_client("api/sound".to_string(), form)?;

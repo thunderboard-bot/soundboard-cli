@@ -20,12 +20,13 @@ pub fn post_client(path: String, data: String) -> Result<RequestBuilder, Box<dyn
     let request_path = format!("{}/{}", config.server, path);
     let mut header_map = HeaderMap::new();
     header_map.insert("Auth-Token", format!("{}", config.token).parse().unwrap());
+    header_map.insert("Content-Type", "application/json".parse().unwrap());
     let client = Client::builder()
         .default_headers(
             header_map
         )
         .build()?;
-    Ok(client.get(&request_path)
+    Ok(client.post(&request_path)
         .body(data))
 }
 
@@ -39,5 +40,5 @@ pub fn post_without_body_client(path: String) -> Result<RequestBuilder, Box<dyn 
             header_map
         )
         .build()?;
-    Ok(client.get(&request_path))
+    Ok(client.post(&request_path))
 }

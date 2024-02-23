@@ -49,7 +49,20 @@ pub fn get_config() -> Result<Config, Box<dyn Error>> {
             )
         )
     }
-    Ok(config.unwrap())
+    let config = config.unwrap();
+    
+    if config.server.is_empty() || config.token.is_empty()
+    {
+        return Err(
+            Box::new(
+                CustomError(
+                    "Config file is missing server or token"
+                        .into()
+                )
+            )
+        )
+    }
+    Ok(config)
 }
 
 pub fn set_token(token: String) -> Result<(), Box<dyn Error>> {

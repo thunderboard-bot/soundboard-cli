@@ -15,7 +15,10 @@ async fn main() {
                 Some(("token", token_matches)) => {
                     let token = token_matches.get_one::<String>("token").unwrap();
                     println!("Setting token to {}", token);
-                    config::set_token(token.clone()).unwrap();
+                    let result = config::set_token(token.clone());
+                    if result.is_err() {
+                        println!("Failed to set token: {}", result.err().unwrap());
+                    }
                 },
                 Some(("api", api_matches)) => {
                     let api_url = api_matches.get_one::<String>("api-url").unwrap();
@@ -25,25 +28,37 @@ async fn main() {
                         println!("API URL should not end in /");
                         return;
                     }
-                    config::set_server(api_url.clone()).unwrap();
+                    let result = config::set_server(api_url.clone());
+                    if result.is_err() {
+                        println!("Failed to set API URL: {}", result.err().unwrap());
+                    }
                 },
                 _ => unreachable!()
             }
         },
         Some(("list", _)) => {
             println!("Available Sounds are: ");
-            sounds::list_sounds().await.unwrap();
+            let res = sounds::list_sounds().await;
+            if res.is_err() {
+                println!("Failed to list sounds: {}", res.err().unwrap());
+            }
         },
         Some(("play", play_matches)) => {
             let sound_id = play_matches.get_one::<String>("sound-id").unwrap();
             println!("Playing sound clip {}", sound_id);
-            sounds::play_sound(sound_id.clone()).await.unwrap();
+            let res = sounds::play_sound(sound_id.clone()).await;
+            if res.is_err() {
+                println!("Failed to play sound: {}", res.err().unwrap());
+            }
         },
         Some(("add", add_matches)) => {
             let sound_name = add_matches.get_one::<String>("sound-name").unwrap();
             let sound_file = add_matches.get_one::<String>("path/to/sound-file").unwrap();
             println!("Uploading sound clip {} from {}", sound_name, sound_file);
-            sounds::add_sound(sound_name.clone(), sound_file.clone()).await.unwrap();
+            let res = sounds::add_sound(sound_name.clone(), sound_file.clone()).await;
+            if res.is_err() {
+                println!("Failed to upload sound: {}", res.err().unwrap());
+            }
         },
         _ => unreachable!()
     }
@@ -51,7 +66,7 @@ async fn main() {
 
 fn cli() -> Command {
     Command::new("soundboard-cli")
-        .version("1.0")
+        .version("0.1.3")
         .author("Max Pursian")
         .about("CLI to interact with the Discord soundboard bot")
         .subcommand_required(true)
