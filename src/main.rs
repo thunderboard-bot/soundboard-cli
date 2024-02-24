@@ -20,19 +20,19 @@ async fn main() {
                         println!("Failed to set token: {}", result.err().unwrap());
                     }
                 },
-                Some(("api", api_matches)) => {
-                    let api_url = api_matches.get_one::<String>("api-url").unwrap();
-                    println!("Setting API URL to {}", api_url);
+                Some(("server", server_matches)) => {
+                    let api_url = server_matches.get_one::<String>("server-url").unwrap();
+                    println!("Setting server URL to {}", api_url);
                     // verify URL does not end in /
                     if api_url.ends_with("/") {
-                        println!("API URL should not end in /");
+                        println!("server URL should not end in /");
                         return;
                     }
                     let result = config::set_server(api_url.clone());
                     if result.is_err() {
-                        println!("Failed to set API URL: {}", result.err().unwrap());
+                        println!("Failed to set server URL: {}", result.err().unwrap());
                     }
-                },
+                }
                 _ => unreachable!()
             }
         },
@@ -82,10 +82,10 @@ fn cli() -> Command {
                         ),
                 )
                 .subcommand(
-                    Command::new("api")
-                        .about("Set the API URL")
+                    Command::new("server")
+                        .about("Set the server URL")
                         .arg(
-                            Arg::new("api-url")
+                            Arg::new("server-url")
                                 .required(true)
                         ),
                 ),

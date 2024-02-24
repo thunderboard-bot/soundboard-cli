@@ -39,7 +39,7 @@ pub async fn add_sound(sound_name: String, sound_file_path: String) -> Result<()
     }
 
     let sound = response.json::<Sound>().await?;
-    println!("Successfully uploaded! Sound is playable via 'soundboard-cli play {}'", sound.id);
+    println!("Successfully uploaded! Sound is playable via 'thunderboard-cli play {}'", sound.id);
 
     Ok(())
 }

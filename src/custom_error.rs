@@ -6,7 +6,7 @@ pub struct CustomError(pub String);
 
 impl fmt::Display for CustomError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "There is an error: {}", self.0)
+        write!(f, "The following error occurred: {}", self.0)
     }
 }
 
