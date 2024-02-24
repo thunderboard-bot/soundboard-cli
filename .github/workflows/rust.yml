@@ -27,9 +27,6 @@ jobs:
           toolchain: stable
           target: ${{ matrix.target }}
           override: true
-      - name: Set PATH for macOS cross-compilation
-        if: ${{ matrix.target == 'x86_64-apple-darwin' }}
-        run: echo "PATH=${{ env.OSXCROSS_PATH }}:${{ env.PATH }}" >> $GITHUB_ENV
       - name: Install x86 Build Dependencies
         if: ${{ matrix.target == 'i686-pc-windows-gnu' || matrix.target == 'i686-unknown-linux-gnu' }}
         run: sudo dpkg --add-architecture i386 && sudo apt-get update && sudo apt-get install libssl-dev:i386 clang gcc-multilib
@@ -47,6 +44,9 @@ jobs:
           wget -P tarballs https://s3.dockerproject.org/darwin/v2/MacOSX10.10.sdk.tar.xz
           UNATTENDED=yes OSX_VERSION_MIN=10.6 ./build.sh
           echo "OSXCROSS_PATH=$PWD/target/bin" >> $GITHUB_ENV
+      - name: Set PATH for macOS cross-compilation
+        if: ${{ matrix.target == 'x86_64-apple-darwin' }}
+        run: echo "PATH=${{ env.OSXCROSS_PATH }}:${{ env.PATH }}" >> $GITHUB_ENV
       - name: Build x86
         uses: actions-rs/cargo@v1
         if: ${{ matrix.target == 'i686-pc-windows-gnu' || matrix.target == 'i686-unknown-linux-gnu' }}
