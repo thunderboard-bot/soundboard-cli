@@ -33,6 +33,17 @@ jobs:
       - name: Install x86_64 Build Dependencies
         if: ${{ matrix.target != 'i686-pc-windows-gnu' && matrix.target != 'i686-unknown-linux-gnu' }}
         run: sudo apt-get update && sudo apt-get install pkg-config libssl-dev clang
+      - name: Install Windows cross-compilation tools
+        if: ${{ matrix.target == 'x86_64-pc-windows-gnu' || matrix.target == 'i686-pc-windows-gnu' }}
+        run: sudo apt-get install -y mingw-w64
+      - name: Install macOS cross-compilation tools
+        if: ${{ matrix.target == 'x86_64-apple-darwin' }}
+        run: |
+          git clone https://github.com/tpoechtrager/osxcross.git
+          cd osxcross
+          wget -P tarballs https://s3.dockerproject.org/darwin/v2/MacOSX10.10.sdk.tar.xz
+          UNATTENDED=yes OSX_VERSION_MIN=10.6 ./build.sh
+          echo "OSXCROSS_PATH=$PWD/target/bin" >> $GITHUB_ENV
       - name: Build x86
         uses: actions-rs/cargo@v1
         if: ${{ matrix.target == 'i686-pc-windows-gnu' || matrix.target == 'i686-unknown-linux-gnu' }}
