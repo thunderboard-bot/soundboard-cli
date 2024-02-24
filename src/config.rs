@@ -97,6 +97,8 @@ fn set_config(config: Config) -> Result<(), Box<dyn Error>> {
 #[cfg(unix)]
 fn get_config_file() -> Result<PathBuf, Box<dyn Error>> {
     let home = dirs::home_dir().ok_or("Could not find home directory")?;
+    let config_folder = home.join(".config/soundboard-cli");
+    fs::create_dir_all(config_folder)?;
     let config_path = home.join(".config/soundboard-cli/config.toml");
 
     Ok(config_path)
@@ -105,6 +107,8 @@ fn get_config_file() -> Result<PathBuf, Box<dyn Error>> {
 #[cfg(windows)]
 fn get_config_file() -> Result<PathBuf, Box<dyn Error>> {
     let home = dirs::home_dir().ok_or("Could not find home directory")?;
+    let config_folder = home.join("AppData\\Roaming\\soundboard-cli");
+    fs::create_dir_all(config_folder)?;
     let config_path = home.join("AppData\\Roaming\\soundboard-cli\\config.toml");
     Ok(config_path)
 }
