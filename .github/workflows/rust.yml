@@ -9,73 +9,65 @@ permissions:
   contents: write
 
 jobs:
-  build-and-upload:
-    name: Build and upload
-    runs-on: ${{ matrix.os }}
-
+  build:
+    name: Build
+    runs-on: ubuntu-latest
     strategy:
       matrix:
-        # You can add more, for any target you'd like!
-        include:
-          - build: linux
-            os: ubuntu-latest
-            target: x86_64-unknown-linux-musl
-
-          - build: macos
-            os: macos-latest
-            target: x86_64-apple-darwin
-
-          - build: windows
-            os: windows-latest
-            target: x86_64-pc-windows-msvc
-
+        target:
+          - i686-pc-windows-gnu
+          - i686-unknown-linux-gnu
+          - x86_64-apple-darwin
+          - x86_64-pc-windows-gnu
+          - x86_64-unknown-linux-gnu
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-
-      - name: Get the release version from the tag
-        shell: bash
-        run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
-
-      - name: Install OpenSSL
-        run: sudo apt-get install -y libssl-dev
-
-      - name: Install Rust
-        # Or @nightly if you want
-        uses: dtolnay/rust-toolchain@stable
-        # Arguments to pass in
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
         with:
-          # Make Rust compile to our target (defined in the matrix)
-          targets: ${{ matrix.target }}
-
-      - name: Build
+          toolchain: stable
+          target: ${{ matrix.target }}
+          override: true
+      - name: Install x86 Build Dependencies
+        if: ${{ matrix.target == 'i686-pc-windows-gnu' || matrix.target == 'i686-unknown-linux-gnu' }}
+        run: sudo dpkg --add-architecture i386 && sudo apt-get update && sudo apt-get install libssl-dev:i386 clang
+      - name: Install x86_64 Build Dependencies
+        if: ${{ matrix.target != 'i686-pc-windows-gnu' && matrix.target != 'i686-unknown-linux-gnu' }}
+        run: sudo apt-get update && sudo apt-get install pkg-config libssl-dev clang
+      - name: Build x86
         uses: actions-rs/cargo@v1
+        if: ${{ matrix.target == 'i686-pc-windows-gnu' || matrix.target == 'i686-unknown-linux-gnu' }}
+        env:
+          TARGET_CC: clang
+          OPENSSL_LIB_DIR: /usr/lib/i386-linux-gnu/
+          OPENSSL_INCLUDE_DIR: /usr/include/openssl/
         with:
-          use-cross: true
           command: build
-          args: --verbose --release --target ${{ matrix.target }}
-
+          args: --release --target=${{ matrix.target }}
+      - name: Build x86_64
+        uses: actions-rs/cargo@v1
+        if: ${{ matrix.target != 'i686-pc-windows-gnu' && matrix.target != 'i686-unknown-linux-gnu' }}
+        env:
+          TARGET_CC: clang
+        with:
+          command: build
+          args: --release --target=${{ matrix.target }}
       - name: Build archive
         shell: bash
         run: |
           binary_name="thunderboard-cli"
-
           dirname="$binary_name-${{ env.VERSION }}-${{ matrix.target }}"
           mkdir "$dirname"
-          if [ "${{ matrix.os }}" = "windows-latest" ]; then
+          if [ "${{ matrix.target }}" = "x86_64-pc-windows-gnu" ]; then
             mv "target/${{ matrix.target }}/release/$binary_name.exe" "$dirname"
           else
             mv "target/${{ matrix.target }}/release/$binary_name" "$dirname"
           fi
-
-          if [ "${{ matrix.os }}" = "windows-latest" ]; then
+          if [ "${{ matrix.target }}" = "x86_64-pc-windows-gnu" ]; then
             7z a "$dirname.zip" "$dirname"
             echo "ASSET=$dirname.zip" >> $GITHUB_ENV
           else
             tar -czf "$dirname.tar.gz" "$dirname"
             echo "ASSET=$dirname.tar.gz" >> $GITHUB_ENV
-          fi
-
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
