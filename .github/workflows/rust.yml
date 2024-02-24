@@ -27,6 +27,9 @@ jobs:
           toolchain: stable
           target: ${{ matrix.target }}
           override: true
+      - name: Set PATH for macOS cross-compilation
+        if: ${{ matrix.target == 'x86_64-apple-darwin' }}
+        run: echo "PATH=${{ env.OSXCROSS_PATH }}:${{ env.PATH }}" >> $GITHUB_ENV
       - name: Install x86 Build Dependencies
         if: ${{ matrix.target == 'i686-pc-windows-gnu' || matrix.target == 'i686-unknown-linux-gnu' }}
         run: sudo dpkg --add-architecture i386 && sudo apt-get update && sudo apt-get install libssl-dev:i386 clang gcc-multilib
@@ -59,8 +62,6 @@ jobs:
         if: ${{ matrix.target != 'i686-pc-windows-gnu' && matrix.target != 'i686-unknown-linux-gnu' }}
         env:
           TARGET_CC: clang
-          PATH:
-            ${{ matrix.target == 'x86_64-apple-darwin' && env.OSXCROSS_PATH != '' ? env.OSXCROSS_PATH + ':' + env.PATH: env.PATH }}
         with:
           command: build
           args: --release --target=${{ matrix.target }}
