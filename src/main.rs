@@ -66,7 +66,7 @@ async fn main() {
 
 fn cli() -> Command {
     Command::new("thunderboard-cli")
-        .version("0.1.4")
+        .version("0.1.5")
         .author("Max Pursian")
         .about("CLI to interact with the Thunderboard Discord bot")
         .subcommand_required(true)
