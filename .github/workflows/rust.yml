@@ -79,6 +79,7 @@ jobs:
           else
             tar -czf "$dirname.tar.gz" "$dirname"
             echo "ASSET=$dirname.tar.gz" >> $GITHUB_ENV
+          fi
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
